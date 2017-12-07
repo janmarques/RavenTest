@@ -13,7 +13,7 @@ namespace PetsAndPeople
         static void Main(string[] args)
         {
             var fluffy = new Pet { Name = "Fluffy" };
-            var john = new Person("John", new List<Pet> { fluffy });
+            var john = new Person { Name = "John", Pets = new List<Pet> { fluffy } };
 
             using (var store = new DocumentStore
             {
@@ -35,8 +35,7 @@ namespace PetsAndPeople
                 using (var session = store.OpenSession())
                 {
                     var allPets = new List<Pet> { fluffy };
-                    var allPetsQueryable = allPets.Select(x => x.Name).ToList();
-                    var query = session.Query<Person>().Where(p => p.PetsQueryable.ContainsAny(allPetsQueryable));
+                    var query = session.Query<Person>().Where(p => p.Pets.ContainsAny(allPets));
                     var result = query.ToList();
                 }
 
@@ -62,13 +61,6 @@ namespace PetsAndPeople
     {
         public string Name { get; set; }
         public List<Pet> Pets { get; set; }
-        public List<string> PetsQueryable { get; set; }
-        public Person(string name, List<Pet> pets)
-        {
-            Name = name;
-            Pets = pets;
-            PetsQueryable = Pets.Select(x => x.Name).ToList();
-        }
     }
 
     class Pet
