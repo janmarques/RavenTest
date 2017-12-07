@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents.Linq;
 
 namespace PetsAndPeople
@@ -20,6 +22,9 @@ namespace PetsAndPeople
             })
             {
                 store.Initialize();
+
+                new PersonIndex().Execute(store);
+                Thread.Sleep(5000); // wait for index
                 using (var session = store.OpenSession())
                 {
                     session.Store(john);
@@ -44,6 +49,14 @@ namespace PetsAndPeople
         }
     }
 
+    class PersonIndex : AbstractIndexCreationTask<Person>
+    {
+        public PersonIndex()
+        {
+            Map = persons => from person in persons
+                             select new { person.Name, person.Pets };
+        }
+    }
     class Person
     {
         public string Name { get; set; }
