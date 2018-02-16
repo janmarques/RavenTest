@@ -60,11 +60,11 @@ namespace PetsAndPeople
                 {
                     var query1 = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>().Where(p => p.PetName == null);
                     var result1 = query1.ToList().Count();
-                    Console.WriteLine("Comparison serverside: " + result1);
+                    Console.WriteLine("Comparison serverside: " + result1); //0
 
                     var query2 = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>();
                     var result2 = query2.ToList().Where(p => p.PetName == null).Count();
-                    Console.WriteLine("Comparison clientside: " + result2);
+                    Console.WriteLine("Comparison clientside: " + result2); //1
                 }
             }
         }
