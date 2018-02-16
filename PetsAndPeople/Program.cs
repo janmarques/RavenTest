@@ -38,6 +38,7 @@ namespace PetsAndPeople
         static void Main(string[] args)
         {
             var john = new Person { Id = Guid.NewGuid().ToString(), Pet = null };
+            var jason = new Person { Id = Guid.NewGuid().ToString(), Pet = new Pet { Name = "Pastice" } };
 
             using (var store = new DocumentStore
             {
@@ -57,9 +58,13 @@ namespace PetsAndPeople
 
                 using (var session = store.OpenSession())
                 {
-                    var query = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>().Where(p => p.PetName == null);
-                    var result = query.ToList();
-                    var shouldBeJohn = result.Single();
+                    var query1 = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>().Where(p => p.PetName == null);
+                    var result1 = query1.ToList().Count();
+                    Console.WriteLine("Comparison serverside: " + result1);
+
+                    var query2 = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>();
+                    var result2 = query2.ToList().Where(p => p.PetName == null).Count();
+                    Console.WriteLine("Comparison clientside: " + result2);
                 }
             }
         }
