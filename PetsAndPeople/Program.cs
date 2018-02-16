@@ -38,7 +38,6 @@ namespace PetsAndPeople
         static void Main(string[] args)
         {
             var john = new Person { Id = Guid.NewGuid().ToString(), Pet = null };
-            var jason = new Person { Id = Guid.NewGuid().ToString(), Pet = new Pet { Name = "Pastice" } };
 
             using (var store = new DocumentStore
             {
