@@ -37,6 +37,9 @@
       <HintPath>..\packages\Lambda2Js.3.0.1\lib\net40\Lambda2Js.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Lambda2Js.Signed.Custom, Version=3.0.2.0, Culture=neutral, PublicKeyToken=9ba16f7edfc48fe6, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client.4.0.0\lib\netstandard2.0\Lambda2Js.Signed.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
@@ -45,18 +48,19 @@
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Raven.Client, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.4.0.0-rc-40023\lib\netstandard1.3\Raven.Client.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Raven.Client, Version=4.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client.4.0.0\lib\netstandard2.0\Raven.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Sparrow, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.4.0.0-rc-40023\lib\netstandard1.3\Sparrow.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Sparrow, Version=4.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client.4.0.0\lib\netstandard2.0\Sparrow.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -182,7 +186,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

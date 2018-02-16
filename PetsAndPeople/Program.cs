@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using Raven.Client.Documents;
@@ -7,13 +7,37 @@ using Raven.Client.Documents.Linq;
 
 namespace PetsAndPeople
 {
+    class Person
+    {
+        public string Id { get; set; }
+        public Pet Pet { get; set; }
+    }
+
+    class Pet
+    {
+        public string Name { get; set; }
+    }
+
+    class PersonWithPet
+    {
+        public string PersonId { get; set; }
+        public string PetName { get; set; }
+    }
+
+    class PersonIndex : AbstractIndexCreationTask<Person>
+    {
+        public PersonIndex()
+        {
+            Map = persons => from person in persons
+                             select new PersonWithPet { PersonId = person.Id, PetName = person.Pet.Name };
+        }
+    }
+
     class Program
     {
-        //README First create the zoo database in Raven (4.0.0-rc-40023), then run the code below
         static void Main(string[] args)
         {
-            var fluffy = new Pet { Name = "Fluffy" };
-            var john = new Person { Name = "John", Pets = new List<Pet> { fluffy } };
+            var john = new Person { Id = Guid.NewGuid().ToString(), Pet = null };
 
             using (var store = new DocumentStore
             {
@@ -31,40 +55,13 @@ namespace PetsAndPeople
                     session.SaveChanges();
                 }
 
-                // This query execution crashes
                 using (var session = store.OpenSession())
                 {
-                    var allPets = new List<Pet> { fluffy };
-                    var query = session.Query<Person>().Where(p => p.Pets.ContainsAny(allPets));
+                    var query = session.Query<Person, PersonIndex>().ProjectInto<PersonWithPet>().Where(p => p.PetName == null);
                     var result = query.ToList();
-                }
-
-                // This query execution crashes as well
-                using (var session = store.OpenSession())
-                {
-                    var query = session.Query<Person>().Where(p => fluffy.In(p.Pets));
-                    var result = query.ToList();
+                    var shouldBeJohn = result.Single();
                 }
             }
         }
-    }
-
-    class PersonIndex : AbstractIndexCreationTask<Person>
-    {
-        public PersonIndex()
-        {
-            Map = persons => from person in persons
-                             select new { person.Name, person.Pets };
-        }
-    }
-    class Person
-    {
-        public string Name { get; set; }
-        public List<Pet> Pets { get; set; }
-    }
-
-    class Pet
-    {
-        public string Name { get; set; }
     }
 }
