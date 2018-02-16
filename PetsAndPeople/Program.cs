@@ -10,18 +10,11 @@ namespace PetsAndPeople
     class Person
     {
         public string Id { get; set; }
-        public Pet Pet { get; set; }
     }
 
-    class Pet
-    {
-        public string Name { get; set; }
-    }
-
-    class PersonWithPet
+    class PersonVM
     {
         public string PersonId { get; set; }
-        public string PetName { get; set; }
     }
 
     class PersonIndex : AbstractIndexCreationTask<Person>
@@ -29,7 +22,7 @@ namespace PetsAndPeople
         public PersonIndex()
         {
             Map = persons => from person in persons
-                             select new PersonWithPet { PersonId = person.Id, PetName = person.Pet.Name };
+                             select new PersonVM { PersonId = person.Id};
         }
     }
 
@@ -37,7 +30,7 @@ namespace PetsAndPeople
     {
         static void Main(string[] args)
         {
-            var john = new Person { Id = Guid.NewGuid().ToString(), Pet = null };
+            var john = new Person { Id = null };
 
             using (var store = new DocumentStore
             {
@@ -57,13 +50,14 @@ namespace PetsAndPeople
 
                 using (var session = store.OpenSession())
                 {
-                    var query1 = session.Query<PersonWithPet, PersonIndex>().ProjectInto<PersonWithPet>().Where(p => p.PetName == null);
+                    var query1 = session.Query<PersonVM, PersonIndex>().ProjectInto<PersonVM>().Where(p => p.PersonId == null);
                     var result1 = query1.ToList().Count();
                     Console.WriteLine("Comparison serverside: " + result1); //0
 
-                    var query2 = session.Query<PersonWithPet, PersonIndex>().ProjectInto<PersonWithPet>();
-                    var result2 = query2.ToList().Where(p => p.PetName == null).Count();
-                    Console.WriteLine("Comparison clientside: " + result2); //1
+                    var query2 = session.Query<PersonVM, PersonIndex>().ProjectInto<PersonVM>();
+                    var result2 = query2.ToList(); //list containing NULL element
+                    var count = result2.Where(p => p.PersonId == null).Count(); // crashes 
+                    Console.WriteLine("Comparison clientside: " + count); //1
                 }
             }
         }
