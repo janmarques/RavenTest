@@ -26,8 +26,6 @@ namespace PetsAndPeople
         {
             Map = persons => from person in persons
                              select new PersonVM { Id = person.Id, Name = person.Name };
-            //Store("PersonName", FieldStorage.Yes);
-            //StoresStrings.Add(Constants.Documents.Indexing.Fields.AllFields, FieldStorage.Yes);
         }
     }
 
@@ -55,7 +53,7 @@ namespace PetsAndPeople
 
                 using (var session = store.OpenAsyncSession())
                 {
-                    var query1 = session.Advanced.AsyncRawQuery<PersonVM>(@"from index 'PersonIndex' where search(Name, '*joh*') order by Id desc");
+                    var query1 = session.Advanced.AsyncRawQuery<PersonVM>(@"from index 'PersonIndex' order by Id desc");
                     var result1 = query1.CountAsync().Result;
                 }
             }
