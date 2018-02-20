@@ -17,7 +17,7 @@ namespace PetsAndPeople
     class PersonVM
     {
         public string Id { get; set; }
-        public string Name { get; set; }
+        public string ProjectedName { get; set; }
     }
 
     class PersonIndex : AbstractIndexCreationTask<Person>
@@ -25,7 +25,8 @@ namespace PetsAndPeople
         public PersonIndex()
         {
             Map = persons => from person in persons
-                             select new PersonVM { Id = person.Id, Name = person.Name };
+                             select new PersonVM { Id = person.Id, ProjectedName = person.Name };
+            StoresStrings.Add(Constants.Documents.Indexing.Fields.AllFields, FieldStorage.Yes);
         }
     }
 
@@ -53,8 +54,13 @@ namespace PetsAndPeople
 
                 using (var session = store.OpenAsyncSession())
                 {
-                    var query1 = session.Advanced.AsyncRawQuery<PersonVM>(@"from index 'PersonIndex' order by Id desc");
-                    var result1 = query1.CountAsync().Result;
+                    var query1 = session.Advanced.AsyncRawQuery<PersonVM>(@"from index 'PersonIndex'");
+                    var result1 = query1.ToListAsync().Result;
+                    Console.WriteLine(result1.First().ProjectedName); // null
+
+                    var query2 = session.Advanced.AsyncRawQuery<PersonVM>($@"from index 'PersonIndex' select {Constants.Documents.Indexing.Fields.AllStoredFields}");
+                    var result2 = query2.ToListAsync().Result;
+                    Console.WriteLine(result2.First().ProjectedName); // John
                 }
             }
         }
