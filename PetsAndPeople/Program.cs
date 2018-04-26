@@ -10,22 +10,40 @@ namespace PetsAndPeople
 {
     class Person
     {
-        public string Id { get; set; }
         public string Name { get; set; }
+        public Identity ExtraId { get; set; }
+    }
+
+    class Identity
+    {
+        public Guid Guid { get; set; }
     }
 
     class PersonVM
     {
-        public string Id { get; set; }
-        public string ProjectedName { get; set; }
+        public string Name { get; set; }
+        public IdentityVM ExtraId { get; set; }
     }
+
+    class IdentityVM
+    {
+        public Guid Guid { get; set; }
+    }
+
 
     class PersonIndex : AbstractIndexCreationTask<Person>
     {
         public PersonIndex()
         {
             Map = persons => from person in persons
-                             select new PersonVM { Id = person.Id, ProjectedName = person.Name };
+                             select new PersonVM
+                             {
+                                 Name = person.Name,
+                                 ExtraId = new IdentityVM
+                                 {
+                                     Guid = person.ExtraId.Guid
+                                 }
+                             };
             StoresStrings.Add(Constants.Documents.Indexing.Fields.AllFields, FieldStorage.Yes);
         }
     }
@@ -34,7 +52,8 @@ namespace PetsAndPeople
     {
         static void Main(string[] args)
         {
-            var john = new Person { Id = Guid.NewGuid().ToString(), Name = "john" };
+            var john = new Person { ExtraId = new Identity { Guid = Guid.NewGuid() }, Name = "john" };
+            var jeff = new Person { ExtraId = null, Name = "jeff" };
 
             using (var store = new DocumentStore
             {
@@ -49,18 +68,14 @@ namespace PetsAndPeople
                 using (var session = store.OpenSession())
                 {
                     session.Store(john);
+                    session.Store(jeff);
                     session.SaveChanges();
                 }
 
                 using (var session = store.OpenAsyncSession())
                 {
-                    var query1 = session.Advanced.AsyncRawQuery<PersonVM>(@"from index 'PersonIndex'");
+                    var query1 = session.Query<PersonVM>("PersonIndex");//.ProjectInto<PersonVM>();
                     var result1 = query1.ToListAsync().Result;
-                    Console.WriteLine(result1.First().ProjectedName); // null
-
-                    var query2 = session.Advanced.AsyncRawQuery<PersonVM>($@"from index 'PersonIndex' select {Constants.Documents.Indexing.Fields.AllStoredFields}");
-                    var result2 = query2.ToListAsync().Result;
-                    Console.WriteLine(result2.First().ProjectedName); // John
                 }
             }
         }
