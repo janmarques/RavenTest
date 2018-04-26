@@ -11,23 +11,23 @@ namespace PetsAndPeople
     class Person
     {
         public string Name { get; set; }
-        public Identity ExtraId { get; set; }
+        public Pet Pet { get; set; }
     }
 
-    class Identity
+    class Pet
     {
-        public Guid Guid { get; set; }
+        public int Age { get; set; }
     }
 
     class PersonVM
     {
         public string Name { get; set; }
-        public IdentityVM ExtraId { get; set; }
+        public PetVM Pet { get; set; }
     }
 
-    class IdentityVM
+    class PetVM
     {
-        public Guid Guid { get; set; }
+        public int Age { get; set; }
     }
 
 
@@ -39,10 +39,10 @@ namespace PetsAndPeople
                              select new PersonVM
                              {
                                  Name = person.Name,
-                                 ExtraId = new IdentityVM
+                                 Pet = person.Pet == null ? null : new PetVM
                                  {
-                                     Guid = person.ExtraId.Guid
-                                 }
+	                                 Age = person.Pet.Age
+								 }
                              };
             StoresStrings.Add(Constants.Documents.Indexing.Fields.AllFields, FieldStorage.Yes);
         }
@@ -52,8 +52,8 @@ namespace PetsAndPeople
     {
         static void Main(string[] args)
         {
-            var john = new Person { ExtraId = new Identity { Guid = Guid.NewGuid() }, Name = "john" };
-            var jeff = new Person { ExtraId = null, Name = "jeff" };
+            var john = new Person { Pet = new Pet { Age = 2316 }, Name = "john" };
+            var jeff = new Person { Pet = null, Name = "jeff" };
 
             using (var store = new DocumentStore
             {
@@ -74,7 +74,7 @@ namespace PetsAndPeople
 
                 using (var session = store.OpenAsyncSession())
                 {
-                    var query1 = session.Query<PersonVM>("PersonIndex");//.ProjectInto<PersonVM>();
+	                var query1 = session.Query<PersonVM>("PersonIndex").ProjectInto<PersonVM>();
                     var result1 = query1.ToListAsync().Result;
                 }
             }
