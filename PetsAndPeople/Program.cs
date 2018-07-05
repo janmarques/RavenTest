@@ -14,24 +14,38 @@ namespace PetsAndPeople
     class Person
     {
         public string Id { get; set; }
-        public string Name { get; set; }
-        public string FirstName { get; set; }
+        public bool? Active { get; set; }
+        public bool? Alive { get; set; }
     }
+
+    class PersonVm
+    {
+        public string Id { get; set; }
+        public bool? Active { get; set; }
+        public bool? Alive { get; set; }
+    }
+
+    class PersonIndex : AbstractIndexCreationTask<Person, PersonVm>
+    {
+        public PersonIndex()
+        {
+            Map = persons => from person in persons
+                             select new PersonVm
+                             {
+                                 Id = person.Id,
+                                 Active = person.Active,
+                                 Alive = person.Alive,
+                             };
+            StoresStrings.Add(Constants.Documents.Indexing.Fields.AllFields, FieldStorage.Yes);
+        }
+    }
+
 
     class Program
     {
         static void Main(string[] args)
         {
-            var people = new List<Person>();
-            for (int i = 0; i < 100_000; i++)
-            {
-                people.Add(new Person
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Guid.NewGuid().ToString(),
-                    FirstName = Guid.NewGuid().ToString()
-                });
-            }
+            var john = new Person { Id = Guid.NewGuid().ToString(), Active = true, Alive = true };
 
             using (var store = new DocumentStore
             {
@@ -40,13 +54,21 @@ namespace PetsAndPeople
             })
             {
                 store.Initialize();
-
-                using (var bulkinsert = store.BulkInsert())
+                new PersonIndex().Execute(store);
+                Thread.Sleep(5000); // wait for index
+                using (var session = store.OpenSession())
                 {
-                    people.ForEach(x => bulkinsert.Store(x));
+                    session.Store(john);
+                    session.SaveChanges();
+                }
 
-                    //var tasks = people.Select(x => bulkinsert.StoreAsync(x)).ToArray();
-                    //Task.WaitAll(tasks);
+                using (var session = store.OpenAsyncSession())
+                {
+                    var query1 = session.Query<PersonVm>("PersonIndex")
+                        .Where(x => x.Active.Value && x.Alive.HasValue); // fails
+                    //var query1 = session.Query<PersonVm>("PersonIndex")
+                    //    .Where(x => x.Active.Value == true && x.Alive.HasValue == true); // passes
+                    var result1 = query1.ToListAsync().Result;
                 }
             }
         }
